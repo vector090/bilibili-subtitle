@@ -24,6 +24,9 @@ import {
   SUMMARIZE_TYPES,
   TRANSLATE_COOLDOWN,
   TRANSLATE_FETCH_DEFAULT,
+
+  MAX_OUTPUT_TOKEN,
+
 } from '../consts/const'
 import toast from 'react-hot-toast'
 import {useMemoizedFn} from 'ahooks/es'
@@ -105,7 +108,7 @@ const useTranslate = () => {
                   }
                 ],
                 generationConfig: {
-                  maxOutputTokens: 2048
+                  maxOutputTokens: MAX_OUTPUT_TOKEN
                 }
               }
             :{
@@ -182,7 +185,7 @@ const useTranslate = () => {
                 }
               ],
               generationConfig: {
-                maxOutputTokens: 2048
+                maxOutputTokens: MAX_OUTPUT_TOKEN
               }
             }
           :{
@@ -237,7 +240,7 @@ const useTranslate = () => {
                 }
               ],
               generationConfig: {
-                maxOutputTokens: 2048
+                maxOutputTokens: MAX_OUTPUT_TOKEN
               }
             }
           :{

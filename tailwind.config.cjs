@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       fontSize: {
-        xs: '13px',
+        xs: '15px', // fuyc: was 13
       },
     },
   },

@@ -187,9 +187,10 @@ const debug = (...args: any[]) => {
         }
 
         console.log("get subtitle url for aid", aid, "cid", cid, "author", author, "title", title); // fuyc
-        chrome.storage.sync.set({ 'aid': aid, 'cid': cid }, function () {
-          console.log('video id saved');
-        });
+        // following no need, just done in refreshSubtitles is enough
+        // chrome.storage.sync.set({ 'aid': aid, 'cid': cid }, function () {
+        //   console.log('video id saved');
+        // });
 
         // pagesMap
         pagesMap = {}
@@ -229,6 +230,11 @@ const debug = (...args: any[]) => {
 
     if (aid !== lastAid || cid !== lastCid) {
       debug('refreshSubtitles', aid, cid)
+
+      console.log('refreshSubtitles', aid, cid); // fuyc
+      chrome.storage.sync.set({ 'aid': aid, 'cid': cid }, function () {
+        console.log('video id saved on refreshSubtitles', aid, cid);
+      });
 
       lastAid = aid
       lastCid = cid
@@ -289,6 +295,7 @@ const debug = (...args: any[]) => {
       if (url.startsWith('http://')) {
         url = url.replace('http://', 'https://')
       }
+      console.log("GET_SUBTITLE", params);
       return await fetch(url).then(async res => await res.json())
     },
     GET_VIDEO_STATUS: async (params) => {

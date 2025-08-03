@@ -78,6 +78,25 @@ const useSubtitleService = () => {
   // 获取
   useEffect(() => {
     if (curInfo && !curFetched) {
+      
+      // console.log("sendInject GET_SUBTITLE", curInfo); // fuyc
+      /*
+      curInfo is like:
+
+      {
+    "id": 1154004233993963500,
+    "lan": "ai-zh",
+    "lan_doc": "中文（自动翻译）",
+    "is_lock": false,
+    "subtitle_url": "//aisubtitle.hdslb.com/bfs/ai_subtitle/prod/286928315231721892c4578a53303caa3498a7d4d9a2be2b2c?auth_key=1746609158-3ad144fce14441d698dfa23a956c65ca-0-72fd4ad92de0d76709f1f314724213cf",
+    "subtitle_url_v2": "//subtitle.bilibili.com/%01%1B%5C=_%04%12%12%049f%2F%07H%08%29~%16$5%0D.%0B%0AL%03%2C%01%1A%00M:%1Ce%00%0F%1FF%03%003%1A6%17%0A%25U%14%16Q%16%2CI%16o%15N%5E%04CeBJPW%5DV%1DAt_gY%13%17%7FUQ%0D%5CQZ%5CZ%20%14%1F%7F%15AK%1FQ:%12%16yFD%0AXC%3FC%18?auth_key=1746609158-3ad144fce14441d698dfa23a956c65ca-0-72fd4ad92de0d76709f1f314724213cf",
+    "type": 1,
+    "id_str": "1154004233993963520",
+    "ai_type": 1,
+    "ai_status": 2
+      }
+      */
+
       sendInject(null, 'GET_SUBTITLE', {info: curInfo}).then(data => {
         data?.body?.forEach((item: TranscriptItem, idx: number) => {
           item.idx = idx

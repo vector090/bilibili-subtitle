@@ -251,6 +251,8 @@ export const TRANSLATE_FETCH_MAX = 25
 export const TRANSLATE_FETCH_STEP = 5
 export const LANGUAGE_DEFAULT = 'en'
 
+export const MAX_OUTPUT_TOKEN = 8192; // fuyc. No much use. If output is truncated, tune 分段字数 in options.
+
 export const TOTAL_HEIGHT_MIN = 400
 export const TOTAL_HEIGHT_DEF = 520
 export const TOTAL_HEIGHT_MAX = 800
