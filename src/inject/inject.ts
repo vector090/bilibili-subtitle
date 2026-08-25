@@ -158,6 +158,8 @@ const debug = (...args: any[]) => {
       // console.debug('refreshVideoInfo')
 
       lastAidOrBvid = aidOrBvid
+      lastCapturedAidCid = ''
+      capturedSubtitleUrls.clear()
       if (aidOrBvid) {
         // aid,pages
         let cid: string | undefined
@@ -246,6 +248,7 @@ const debug = (...args: any[]) => {
           .then(res => {
             // remove elements with empty subtitle_url
             res.data.subtitle.subtitles = res.data.subtitle.subtitles.filter((item: any) => item.subtitle_url)
+            hasApiSubtitles = res.data.subtitle.subtitles.length > 0
             if (res.data.subtitle.subtitles.length > 0) {
               runtime.injectMessaging.sendApp(!!sidePanel, 'SET_INFOS', {
                 infos: res.data.subtitle.subtitles
@@ -254,6 +257,69 @@ const debug = (...args: any[]) => {
           })
       }
     }
+  }
+
+  // ---- 捕获播放器网络请求中的 v1 直连字幕 URL（用于付费视频） ----
+  let hasApiSubtitles: boolean | null = null
+  const capturedSubtitleUrls = new Map<string, any>()
+  let lastCapturedAidCid = ''
+
+  const getCurrentAidCidKey = () => {
+    if (aid == null) return ''
+    const urlSearchParams = new URLSearchParams(window.location.search)
+    const p = urlSearchParams.get('p') || 1
+    const page = pagesMap[p]
+    const cid: number | null = page?.cid
+    return cid ? `${aid}_${cid}` : ''
+  }
+
+  const buildCapturedInfo = (url: string): any => {
+    return {
+      id: Date.now(),
+      id_str: String(Date.now()),
+      lan: 'captured',
+      lan_doc: '在线字幕（已捕获）',
+      subtitle_url: url,
+      subtitle_url_v2: '',
+      type: 1,
+      ai_type: 0,
+      ai_status: 2,
+    }
+  }
+
+  const handleCapturedResource = (url: string) => {
+    // 只关心被抓取过的 AI 字幕直链
+    if (!url.includes('aisubtitle.hdslb.com/bfs/ai_subtitle/')) return
+    const key = getCurrentAidCidKey()
+    if (!key) return
+    // 换视频/分 P 时清空旧捕获
+    if (lastCapturedAidCid !== key) {
+      capturedSubtitleUrls.clear()
+      lastCapturedAidCid = key
+    }
+    if (capturedSubtitleUrls.has(url)) return
+    capturedSubtitleUrls.set(url, buildCapturedInfo(url))
+    // 仅当 API 已确认未提供字幕（付费视频等）时，用捕获结果填充
+    if (hasApiSubtitles === false) {
+      runtime.injectMessaging.sendApp(!!sidePanel, 'SET_INFOS', {
+        infos: Array.from(capturedSubtitleUrls.values())
+      })
+    }
+  }
+
+  const initSubtitleCapture = () => {
+    if (typeof PerformanceObserver === 'undefined') {
+      // 兜底：一次性读取已有资源记录
+      performance.getEntriesByType('resource').forEach(e => handleCapturedResource(e.name))
+      return
+    }
+    const obs = new PerformanceObserver(list => {
+      list.getEntries().forEach(e => handleCapturedResource(e.name))
+    })
+    obs.observe({
+      entryTypes: ['resource'],
+      buffered: true,
+    })
   }
 
   const updateIframeHeight = () => {
@@ -381,6 +447,9 @@ const debug = (...args: any[]) => {
 
   // 初始化injectMessage
   runtime.injectMessaging.init(methods)
+
+  // 初始化语音字幕捕获器（付费视频等 wbi/v2 返回空时的补充渠道）
+  initSubtitleCapture()
 
   setInterval(() => {
     if (!sidePanel) {
