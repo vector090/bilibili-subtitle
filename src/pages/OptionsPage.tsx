@@ -3,6 +3,7 @@ import {setEnvData} from '../redux/envReducer'
 import {useAppDispatch, useAppSelector} from '../hooks/redux'
 import {
   ASK_ENABLED_DEFAULT,
+  BCS_URL_PLACEHOLDER,
   CUSTOM_MODEL_TOKENS,
   DEFAULT_SERVER_URL_OPENAI,
   GEMINI_TOKENS,
@@ -79,6 +80,7 @@ const OptionsPage = () => {
   const {value: summarizeFloatValue, onChange: setSummarizeFloatValue} = useEventChecked(envData.summarizeFloat)
   const [apiKeyValue, { onChange: onChangeApiKeyValue }] = useEventTarget({initialValue: envData.apiKey??''})
   const [serverUrlValue, setServerUrlValue] = useState(envData.serverUrl)
+  const [bcsUrlValue, setBcsUrlValue] = useState(envData.bcsUrl ?? '')
   const [geminiApiKeyValue, { onChange: onChangeGeminiApiKeyValue }] = useEventTarget({initialValue: envData.geminiApiKey??''})
   const [languageValue, { onChange: onChangeLanguageValue }] = useEventTarget({initialValue: envData.language??LANGUAGE_DEFAULT})
   const [modelValue, { onChange: onChangeModelValue }] = useEventTarget({initialValue: envData.model??MODEL_DEFAULT})
@@ -127,6 +129,7 @@ const OptionsPage = () => {
       aiType: aiTypeValue,
       apiKey: apiKeyValue,
       serverUrl: serverUrlValue,
+      bcsUrl: bcsUrlValue,
       model: modelValue,
       customModel: customModelValue,
       customModelTokens: customModelTokensValue,
@@ -153,7 +156,7 @@ const OptionsPage = () => {
     setTimeout(() => {
       window.close()
     }, 3000)
-  }, [dispatch, sendExtension, sidePanelValue, autoInsertValue, autoExpandValue, aiTypeValue, apiKeyValue, serverUrlValue, modelValue, customModelValue, customModelTokensValue, geminiApiKeyValue, translateEnableValue, languageValue, hideOnDisableAutoTranslateValue, themeValue, transDisplayValue, summarizeEnableValue, summarizeFloatValue, summarizeLanguageValue, wordsValue, fetchAmountValue, fontSizeValue, promptsValue, searchEnabledValue, cnSearchEnabledValue, askEnabledValue])
+  }, [dispatch, sendExtension, sidePanelValue, autoInsertValue, autoExpandValue, aiTypeValue, apiKeyValue, serverUrlValue, bcsUrlValue, modelValue, customModelValue, customModelTokensValue, geminiApiKeyValue, translateEnableValue, languageValue, hideOnDisableAutoTranslateValue, themeValue, transDisplayValue, summarizeEnableValue, summarizeFloatValue, summarizeLanguageValue, wordsValue, fetchAmountValue, fontSizeValue, promptsValue, searchEnabledValue, cnSearchEnabledValue, askEnabledValue])
 
   const onCancel = useCallback(() => {
     window.close()
@@ -395,6 +398,17 @@ const OptionsPage = () => {
           <input id='askEnabled' type='checkbox' className='toggle toggle-primary' checked={askEnabledValue}
                  onChange={setAskEnabledValue}/>
         </FormItem>
+      </OptionCard>
+
+      <OptionCard title='内容存储服务 (BCS)'>
+        <FormItem title='服务地址' htmlFor='bcsUrl' tip='留空则不启用,扩展保持原有行为'>
+          <input id='bcsUrl' type='text' className='input input-sm input-bordered w-full'
+                 placeholder={BCS_URL_PLACEHOLDER} value={bcsUrlValue}
+                 onChange={e => setBcsUrlValue(e.target.value)}/>
+        </FormItem>
+        <div className='desc text-sm'>
+          配置后:观看视频时自动上报字幕,AI 总结完成后自动上报摘要,保存到服务端供本地 grep 检索。留空则完全不发送任何请求。
+        </div>
       </OptionCard>
 
       <OptionCard title='提示词配置'>

@@ -40,6 +40,9 @@ interface EnvData {
   // ask
   askEnabled?: boolean
 
+  // bili-content-server (BCS); empty/undefined keeps default behaviour
+  bcsUrl?: string
+
   prompts?: {
     [key: string]: string
   }

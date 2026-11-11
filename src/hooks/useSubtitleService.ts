@@ -19,6 +19,7 @@ import {EventBusContext} from '../Router'
 import {EVENT_EXPAND, GEMINI_TOKENS, TOTAL_HEIGHT_MAX, TOTAL_HEIGHT_MIN, WORDS_MIN, WORDS_RATE} from '../consts/const'
 import {useAsyncEffect, useInterval} from 'ahooks'
 import {getModelMaxTokens, getWholeText} from '../utils/bizUtil'
+import {putSubtitle} from '../utils/bcsClient'
 import { useMessage } from './useMessageService'
 
 /**
@@ -43,6 +44,11 @@ const useSubtitleService = () => {
   const autoTranslate = useAppSelector(state => state.env.autoTranslate)
   const reviewed = useAppSelector(state => state.env.tempData.reviewed)
   const reviewActions = useAppSelector(state => state.env.tempData.reviewActions)
+  const title = useAppSelector(state => state.env.title)
+  const author = useAppSelector(state => state.env.author)
+  const url = useAppSelector(state => state.env.url)
+  const ctime = useAppSelector(state => state.env.ctime)
+  const bcsUrl = useAppSelector(state => state.env.envData.bcsUrl)
   const {sendInject} = useMessage(!!envData.sidePanel)
 
   // 如果reviewActions达到15次，则设置reviewed为false
@@ -109,6 +115,16 @@ const useSubtitleService = () => {
       })
     }
   }, [curFetched, curInfo, dispatch, sendInject])
+
+  // Upload subtitle to BCS when configured; no-op when bcsUrl is empty.
+  // Kept as a separate effect so it never changes the subtitle fetching flow.
+  useEffect(() => {
+    if (data != null && data.body.length > 0) {
+      putSubtitle(bcsUrl, {
+        title, author, url, ctime: ctime ?? undefined,
+      }, data, curInfo?.lan)
+    }
+  }, [data, bcsUrl, title, author, url, ctime, curInfo?.lan])
 
   useAsyncEffect(async () => {
     // 初始获取列表

@@ -31,6 +31,7 @@ import {
 import toast from 'react-hot-toast'
 import {useMemoizedFn} from 'ahooks/es'
 import {extractJsonArray, extractJsonObject, getModel} from '../utils/bizUtil'
+import {putSummary} from '../utils/bcsClient'
 import {formatTime} from '../utils/util'
 import { useMessage } from './useMessageService'
 
@@ -46,6 +47,10 @@ const useTranslate = () => {
   const language = LANGUAGES_MAP[envData.language??LANGUAGE_DEFAULT]
   const summarizeLanguage = LANGUAGES_MAP[envData.summarizeLanguage??SUMMARIZE_LANGUAGE_DEFAULT]
   const title = useAppSelector(state => state.env.title)
+  const author = useAppSelector(state => state.env.author)
+  const url = useAppSelector(state => state.env.url)
+  const ctime = useAppSelector(state => state.env.ctime)
+  const bcsUrl = useAppSelector(state => state.env.envData.bcsUrl)
   const reviewed = useAppSelector(state => state.env.tempData.reviewed)
   const reviewAction = useAppSelector(state => state.env.reviewAction)
   const reviewActions = useAppSelector(state => state.env.tempData.reviewActions)
@@ -322,6 +327,19 @@ const useTranslate = () => {
     dispatch(setSummaryStatus({segmentStartIdx: task.def.extra.startIdx, type: summaryType, status: 'done'}))
     dispatch(setSummaryError({segmentStartIdx: task.def.extra.startIdx, type: summaryType, error: task.error}))
     console.debug('setSummary', task.def.extra.startIdx, summaryType, obj, task.error)
+
+    // Upload summary to BCS after AI summarize; no-op when bcsUrl is empty.
+    if (!task.error && obj != null) {
+      putSummary(bcsUrl, {
+        title, author, url, ctime: ctime ?? undefined,
+      }, {
+        type: summaryType,
+        lang: summarizeLanguage?.code,
+        content: obj,
+        text: content,
+        segment: {startIdx: task.def.extra.startIdx},
+      })
+    }
 
 
 
