@@ -1,9 +1,9 @@
 /**
  * Client for bili-content-server (BCS).
  *
- * All upload helpers are no-ops when bcsUrl is not configured, so the
- * extension keeps its original behaviour. Uploads are fire-and-forget:
- * failures only log and never affect the UI.
+ * All upload helpers are no-ops when bcsUrl is empty, so clearing the setting
+ * keeps the extension's original behaviour. Uploads are fire-and-forget and
+ * fail silently: a BCS that is not running must never disturb the user.
  */
 
 export interface BcsVideoMeta {
@@ -67,23 +67,20 @@ const resolveVideoKey = async (meta: BcsVideoMeta): Promise<string | undefined> 
       return `av${aid}_${cid}`
     }
   } catch (e) {
-    console.warn('[BCS] failed to read aid/cid', e)
+    // Fail silently.
   }
   return undefined
 }
 
 const put = async (base: string, key: string, kind: 'subtitle' | 'summary', body: object): Promise<void> => {
   try {
-    const resp = await fetch(`${base}/api/v1/videos/${encodeURIComponent(key)}/${kind}`, {
+    await fetch(`${base}/api/v1/videos/${encodeURIComponent(key)}/${kind}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(body),
     })
-    if (!resp.ok) {
-      console.warn('[BCS] upload failed', kind, resp.status)
-    }
   } catch (e) {
-    console.warn('[BCS] upload error', kind, e)
+    // Fail silently: BCS not running must not disturb the user.
   }
 }
 
@@ -96,7 +93,6 @@ export const putSubtitle = (bcsUrl: string | undefined, meta: BcsVideoMeta,
   void (async () => {
     const key = await resolveVideoKey(meta)
     if (!key) {
-      console.warn('[BCS] cannot resolve video key, skip subtitle')
       return
     }
     await put(base, key, 'subtitle', {
@@ -116,7 +112,6 @@ export const putSummary = (bcsUrl: string | undefined, meta: BcsVideoMeta, summa
   void (async () => {
     const key = await resolveVideoKey(meta)
     if (!key) {
-      console.warn('[BCS] cannot resolve video key, skip summary')
       return
     }
     await put(base, key, 'summary', {

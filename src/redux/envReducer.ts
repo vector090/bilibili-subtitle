@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {find, findIndex} from 'lodash-es'
-import {DEFAULT_SERVER_URL_OPENAI, TOTAL_HEIGHT_DEF} from '../consts/const'
+import {BCS_URL_DEFAULT, DEFAULT_SERVER_URL_OPENAI, TOTAL_HEIGHT_DEF} from '../consts/const'
 
 interface EnvState {
   envData: EnvData
@@ -57,6 +57,7 @@ interface EnvState {
 const initialState: EnvState = {
   envData: {
     serverUrl: DEFAULT_SERVER_URL_OPENAI,
+    bcsUrl: BCS_URL_DEFAULT,
     translateEnable: true,
     summarizeEnable: true,
     autoExpand: true,

@@ -370,5 +370,5 @@ for (const language of LANGUAGES) {
   LANGUAGES_MAP[language.code] = language
 }
 
-// Placeholder hint only for the content-storage service input; not a default value.
-export const BCS_URL_PLACEHOLDER = 'http://127.0.0.1:8787'
+// Default endpoint of bili-content-server (BCS).
+export const BCS_URL_DEFAULT = 'http://127.0.0.1:8787'
